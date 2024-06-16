@@ -75,6 +75,10 @@
     "prismjs"
   ],
   "author": "FlameCaster",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FIameCaster/solid-prism-editor.git"
+  },
   "sideEffects": [
     "*.css",
     "./dist/languages/*",
