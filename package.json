@@ -1,0 +1,84 @@
+{
+  "name": "solid-prism-editor",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./prism": "./dist/prism/index.js",
+    "./prism/utils": "./dist/prism/utils/index.js",
+    "./guides": "./dist/extensions/guides.js",
+    "./copy-button": "./dist/extensions/copy-button/index.js",
+    "./copy-button.css": "./dist/copy.css",
+    "./code-folding.css": "./dist/folding.css",
+    "./scrollbar.css": "./dist/scrollbar.css",
+    "./utils": "./dist/utils/index.js",
+    "./layout.css": "./dist/layout.css",
+    "./rtl-layout.css": "./dist/rtl-layout.css",
+    "./themes/*.css": "./dist/themes/*.css",
+    "./themes": "./dist/themes/index.js",
+    "./languages": "./dist/languages/index.js",
+    "./languages/*": "./dist/languages/*.js",
+    "./prism/languages": "./dist/prism/languages/index.js",
+    "./prism/languages/*": "./dist/prism/languages/*.js",
+    "./match-brackets": "./dist/extensions/match-brackets/index.js",
+    "./highlight-brackets": "./dist/extensions/match-brackets/highlight.js",
+    "./match-tags": "./dist/extensions/match-tags.js",
+    "./setups": "./dist/setups.js",
+    "./tooltips": "./dist/tooltips.js",
+    "./commands": "./dist/extensions/commands.js",
+    "./cursor": "./dist/extensions/cursor.js",
+    "./code-folding": "./dist/extensions/folding/index.js",
+    "./overscroll": "./dist/extensions/overscroll.js",
+    "./search": "./dist/extensions/search/index.js",
+    "./search/api": "./dist/extensions/search/api.js",
+    "./search.css": "./dist/search.css"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build && node scripts/build.mjs",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.12.6",
+    "prism-code-editor": "^3.3.2",
+    "solid-devtools": "^0.29.2",
+    "solid-js": "^1.8.11",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11",
+    "vite-plugin-dts": "^3.8.1",
+    "vite-plugin-solid": "^2.8.2"
+  },
+  "peerDependencies": {
+    "solid-js": "*"
+  },
+  "keywords": [
+    "editor",
+    "code editor",
+    "textarea",
+    "solid",
+    "highlight",
+    "prismjs"
+  ],
+  "author": "FlameCaster",
+  "sideEffects": [
+    "*.css",
+    "./dist/languages/*",
+    "./dist/prism/languages/*"
+  ],
+  "packageManager": "pnpm@9.0.4+sha1.b198ac6d38244fd829253720f9daafd6a606834d"
+}
