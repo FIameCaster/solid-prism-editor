@@ -2,7 +2,7 @@
   "name": "solid-prism-editor",
   "version": "1.0.0",
   "type": "module",
-  "description": "",
+  "description": "Lightweight, extensible code editor component for SolidJS apps",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

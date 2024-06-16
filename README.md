@@ -221,7 +221,7 @@ export const myExtension: Extension = (editor: PrismEditor) => {
   })
 
   // The elements returned are added to the editor's overlays
-  // Keep in mind, they will get some default styles
+  // Keep in mind that they will get some default styles
   return <div>My overlay</div>
 }
 ```
