@@ -88,15 +88,15 @@ export type PrismEditor = {
 		folding?: ReadOnlyCodeFolding
 	}
 	/** Reactive accessor for whether the `textarea` is focused. */
-	focused(): boolean
+	focused(this: void): boolean
 	/** Reactive accessor for the tokens currently displayed in the editor. */
-	tokens(): TokenStream
+	tokens(this: void): TokenStream
 	/** Reactive accessor for the current selection. */
-	selection(): InputSelection
+	selection(this: void): InputSelection
 	/** Forces the editor to update. Can be useful after modifying a grammar for example. */
-	update(): void
+	update(this: void): void
 	/** Gets the `selectionStart`, `selectionEnd` and `selectionDirection` for the `textarea`. */
-	getSelection(): InputSelection
+	getSelection(this: void): InputSelection
 	/**
 	 * Sets the selection for the `textarea` and synchronously updates the `selection` signal.
 	 * If you don't want the signal to update synchronously, use `textarea.setSelectionRange` instead.
@@ -104,7 +104,7 @@ export type PrismEditor = {
 	 * @param end New selectionEnd. Defaults to `start`.
 	 * @param direction New direction.
 	 */
-	setSelection(start: number, end?: number, direction?: "backward" | "forward" | "none"): void
+	setSelection(this: void, start: number, end?: number, direction?: "backward" | "forward" | "none"): void
 }
 
 export type CommentTokens = {
