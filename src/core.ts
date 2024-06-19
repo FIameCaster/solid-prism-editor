@@ -1,9 +1,10 @@
 import {
 	For,
 	createComponent,
-	createEffect,
+	createRenderEffect,
 	createSignal,
 	mergeProps,
+	on,
 	onMount,
 	untrack,
 } from "solid-js"
@@ -34,11 +35,8 @@ const Editor = (props: Partial<EditorProps>) => {
 	let prevClass: string
 	let activeLineNumber = 0
 	let lineCount = 0
+	let isFirstRender = true
 	let editorProps: EditorProps = mergeProps({ language: "text", value }, props)
-
-	const [selection, setSelection] = createSignal<InputSelection>([0, 0, "forward"])
-	const [focused, setFocused] = createSignal(false)
-	const [tokens, setTokens] = createSignal<TokenStream>([])
 
 	const container = editorTemplate() as HTMLDivElement
 	const wrapper = container.firstChild as HTMLDivElement
@@ -51,6 +49,10 @@ const Editor = (props: Partial<EditorProps>) => {
 		textarea.selectionEnd,
 		textarea.selectionDirection,
 	]
+
+	const [selection, setSelection] = createSignal(getInputSelection())
+	const [focused, setFocused] = createSignal(false)
+	const [tokens, setTokens] = createSignal<TokenStream>([])
 
 	const updateSelection = (force?: boolean) => {
 		if (force || handleSelecionChange) {
@@ -65,7 +67,6 @@ const Editor = (props: Partial<EditorProps>) => {
 			}
 
 			setSelection(selection)
-			editorProps.onSelectionChange?.(selection, value, editor)
 		}
 	}
 
@@ -94,7 +95,6 @@ const Editor = (props: Partial<EditorProps>) => {
 
 	const update = () => {
 		setTokens(tokenizeText((value = textarea.value), languages[language] || {}))
-		untrack(() => editorProps.onUpdate?.(value, editor))
 	}
 
 	const editor: PrismEditor = {
@@ -124,13 +124,13 @@ const Editor = (props: Partial<EditorProps>) => {
 		},
 	}
 
-	createEffect(() => {
+	createRenderEffect(() => {
 		let readOnly = !!editorProps.readOnly
 		textarea.inputMode = readOnly ? "none" : ""
 		textarea.setAttribute("aria-readonly", readOnly as any)
 	})
 
-	createEffect(() => {
+	createRenderEffect(() => {
 		let newClass = `prism-code-editor language-${editorProps.language}${
 			editorProps.lineNumbers == false ? "" : " show-line-numbers"
 		} pce-${editorProps.wordWrap ? "" : "no"}wrap${editorProps.rtl ? " pce-rtl" : ""} pce-${
@@ -139,11 +139,19 @@ const Editor = (props: Partial<EditorProps>) => {
 		if (prevClass != newClass) container.className = prevClass = newClass
 	})
 
-	createEffect(() => {
+	createRenderEffect(() => {
 		container.style.tabSize = editorProps.tabSize || (2 as any)
 	})
 
-	createEffect(() => {
+	createRenderEffect(
+		on(selection, s => {
+			if (!isFirstRender) editorProps.onSelectionChange?.(s, value, editor)
+		}),
+	)
+
+	createRenderEffect(() => {
+		tokens()
+		if (isFirstRender) return
 		let newLines = highlightTokens(tokens()).split("\n")
 		let start = 0
 		let end2 = lineCount
@@ -173,7 +181,13 @@ const Editor = (props: Partial<EditorProps>) => {
 		handleSelecionChange = false
 	})
 
-	createEffect(() => {
+	createRenderEffect(
+		on(tokens, () => {
+			if (!isFirstRender) editorProps.onUpdate?.(value, editor)
+		}),
+	)
+
+	createRenderEffect(() => {
 		let newValue = editorProps.value
 		if (prevValue != newValue) {
 			focusRelatedTarget()
@@ -181,6 +195,7 @@ const Editor = (props: Partial<EditorProps>) => {
 			textarea.selectionEnd = 0
 		}
 		language = editorProps.language
+		isFirstRender = false
 		update()
 	})
 

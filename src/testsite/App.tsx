@@ -1,6 +1,7 @@
 import { createSignal, type Component, createEffect, For, batch, on } from "solid-js"
 import { Editor, addTextareaListener } from "../core"
 import "../prism/languages/typescript"
+import "../prism/languages/jsdoc"
 import "../themes/github-dark.css"
 import "./style.css"
 import "../languages/clike"
