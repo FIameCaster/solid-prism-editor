@@ -17,6 +17,7 @@ I realized Prism code editor's architecture made a rewrite in SolidJS not only p
 
 - [Installation](#installation)
 - [Demo](#demo)
+- [Examples](#examples)
 - [Basic usage](#basic-usage)
 - [Props](#props)
 - [Extensions](#extensions)
@@ -30,7 +31,6 @@ I realized Prism code editor's architecture made a rewrite in SolidJS not only p
 - [Languages](#languages)
 - [Styling](#styling)
   - [Themes](#themes)
-- [Examples](#examples)
 - [Performance](#performance)
 - [Contributing](#contributing)
 
@@ -43,6 +43,14 @@ There's a peer dependency on `solid-js` (obviously).
 ## Demo
 
 [Prism code editor's demo](https://prism-code-editor.netlify.app). There's no demo for this SolidJS rewrite since its behavior is nearly identical.
+
+## Examples
+
+- [Usage with SolidStart](https://stackblitz.com/edit/github-pjpawa?file=src%2Fcomponents%2FEditor.tsx,src%2Froutes%2Findex.tsx)
+- [Usage in forms](https://stackblitz.com/edit/solidjs-templates-mg678j?file=src%2FApp.tsx)
+- [Tooltip example](https://stackblitz.com/edit/solidjs-templates-jt7dk5?file=src%2FApp.tsx)
+- [Relative line numbers](https://stackblitz.com/edit/solidjs-templates-zpkbwb?file=src%2FApp.tsx)
+- [Custom cursor](https://stackblitz.com/edit/solidjs-templates-phg5gs?file=src%2FApp.tsx)
 
 ## Basic usage
 
@@ -323,10 +331,6 @@ loadTheme(isDark ? "github-dark" : "github-light").then(theme => {
 ```
 
 If none of the themes fit your website, use one of them as an example to help implement your own.
-
-## Examples
-
-Work in progress.
 
 ## Performance
 
