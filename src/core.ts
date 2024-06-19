@@ -238,6 +238,7 @@ const Editor = (props: Partial<EditorProps>) => {
 			},
 			children: (extension: Extension) => extension(editor)!,
 		}),
+		null,
 	)
 
 	return container
