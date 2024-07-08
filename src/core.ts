@@ -18,7 +18,7 @@ import type {
 	Extension,
 } from "./types"
 import { TokenStream, highlightTokens, languages, tokenizeText } from "./prism"
-import { insert, template } from "solid-js/web"
+import { insert, style, template } from "solid-js/web"
 
 /**
  * The core editor component of the library.
@@ -198,6 +198,10 @@ const Editor = (props: Partial<EditorProps>) => {
 		isFirstRender = false
 		update()
 	})
+
+	createRenderEffect<Record<string, string>>(
+		prev => style(container, props.style as Record<string, string>, prev)!,
+	)
 
 	onMount(() => {
 		editorProps.onMount?.(editor)

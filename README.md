@@ -28,6 +28,7 @@ I realized Prism code editor's architecture made a rewrite in SolidJS not only p
   - [Methods](#methods)
   - [Signals](#signals)
   - [Extensions property](#extensions-property)
+- [Prism](#prism)
 - [Languages](#languages)
 - [Styling](#styling)
   - [Themes](#themes)
@@ -87,6 +88,7 @@ const MyEditor = () => (
 | `wordWrap`          | `boolean`                                                                 | Whether the editor should have word wrap. Defaults to `false`.                                                                                  |
 | `value`             | `string`                                                                  | Initial value to display in the editor.                                                                                                         |
 | `rtl`               | `boolean`                                                                 | Whether the editor uses right to left directionality. Defaults to `false`. Requires extra CSS from `solid-prism-editor/rtl-layout.css` to work. |
+| `style`             | `Omit<JSX.CSSProperties, "tab-size">`                                     | Inline styles for the container element                                                                                                         |
 | `onMount`           | `(editor: PrismEditor) => void`                                           | Callback used to access the underlying editor.                                                                                                  |
 | `onUpdate`          | `(value: string, editor: PrismEditor) => void`                            | Function called after the editor updates.                                                                                                       |
 | `onSelectionChange` | `(selection: InputSelection, value: string, editor: PrismEditor) => void` | Function called when the editor's selection changes.                                                                                            |
@@ -263,7 +265,7 @@ The editor object you can access with the `onMount` prop or by creating an exten
 ### Signals
 
 - `focused(): boolean`: Reactive accessor for whether the `textarea` is focused. Effects depending on this property will run during `focus` or `blur` events on the `textarea`.
-- `tokens(): TokenStream`: Reactive accessor for the current tokens. Effects depending on this property will run right before the tokens are converted to an HTML string.
+- `tokens(): TokenStream`: Reactive accessor for the current tokens. [Computations](https://docs.solidjs.com/reference/secondary-primitives/create-computed) depending on this property will run right before the tokens are converted to an HTML string.
 - `selection(): InputSelection`: Reactive accessor for the current selection. Effects depending on this property will run after the syntax highlighting is finished or when the selection changes.
 
 ### Extensions property

@@ -24,6 +24,8 @@ export type EditorProps = {
 	value: string
 	/** @experimental Whether the editor uses right to left directionality. @default false */
 	rtl?: boolean
+	/** Inline styles for the container element. */
+	style?: Omit<JSX.CSSProperties, "tab-size">
 	/** Callback used to access the underlying editor */
 	onMount?(editor: PrismEditor): void
 	/**
