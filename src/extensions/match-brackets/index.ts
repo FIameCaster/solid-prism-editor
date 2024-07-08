@@ -113,7 +113,7 @@ export const matchBrackets = (
 
 					bracket[0].alias =
 						(alias ? alias + " " : "") +
-						`bracket-${pairMap[i++] == null ? "error" : "level-" + (bracket[2] % 12)}`
+						`bracket-${i++ in pairMap ? "level-" + (bracket[2] % 12) : "error"}`
 				}
 			}
 		})
