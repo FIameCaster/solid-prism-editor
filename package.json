@@ -82,7 +82,8 @@
   "sideEffects": [
     "*.css",
     "./dist/languages/*",
-    "./dist/prism/languages/*"
+    "./dist/prism/languages/*",
+    "./dist/jsx-*"
   ],
   "packageManager": "pnpm@9.0.4+sha1.b198ac6d38244fd829253720f9daafd6a606834d"
 }
