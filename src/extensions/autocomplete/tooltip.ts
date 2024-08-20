@@ -1,5 +1,5 @@
 import { Extension, InputSelection } from "../.."
-import { addTextareaListener, preventDefault } from "../../core"
+import { preventDefault } from "../../core"
 import { addTooltip } from "../../tooltips"
 import { getLanguage, getLineBefore, getModifierCode, insertText, prevSelection } from "../../utils"
 import { Cursor, cursorPosition } from "../cursor"
@@ -8,8 +8,9 @@ import { searchTemplate } from "../search/search"
 import { updateMatched, updateNode } from "./utils"
 import { template } from "solid-js/web"
 import { getStyleValue } from "../../utils/other"
-import { createEffect, createRenderEffect, on, untrack } from "solid-js"
+import { createEffect, createRenderEffect, on, onCleanup, untrack } from "solid-js"
 import { TokenStream } from "../../prism"
+import { addListener } from "../../utils/local"
 
 let count = 0
 
@@ -263,6 +264,119 @@ const autoComplete =
 			} else hide()
 		}
 
+		const cleanUps = [
+			addListener(editor, "mousedown", () => {
+				if (stops) {
+					setTimeout(() => {
+						// Timeout runs before selectionChange, but after
+						// the selection changes as a result of the click
+						const [start, end] = getSelection()
+						if (stops && (start < stops[activeStop] || end > stops[activeStop + 1])) {
+							for (let i = 0, l = stops.length; i < stops.length; i += 2) {
+								if (start >= stops[i] && end <= stops[i + 1]) {
+									if (i + 3 > l) clearStops()
+									else activeStop = i
+									break
+								}
+							}
+						}
+					})
+				}
+			}),
+			addListener(
+				editor,
+				"beforeinput",
+				e => {
+					let inputType = e.inputType
+					let isDelete = inputType[0] == "d"
+					let isInsert = inputType == "insertText"
+					let data = e.data
+					if (
+						isOpen &&
+						isInsert &&
+						!prevSelection &&
+						data &&
+						!data[1] &&
+						currentOptions[activeIndex][4].commitChars?.includes(data)
+					) {
+						insertOption(activeIndex)
+					}
+
+					if (stops) {
+						currentSelection = getSelection()
+						isDeleteForwards =
+							isDelete && inputType[13] == "F" && currentSelection[0] == currentSelection[1]
+					}
+					shouldOpen =
+						!config.explicitOnly &&
+						(shouldOpen || (isInsert && !prevSelection) || (isDelete && isOpen))
+				},
+				true,
+			),
+			addListener(editor, "blur", e => {
+				if (config.closeOnBlur != false && !tooltip.contains(e.relatedTarget as Element)) hide()
+			}),
+			addListener(
+				editor,
+				"keydown",
+				e => {
+					const key = e.key
+					const code = getModifierCode(e)
+
+					if (key == " " && code == 2) {
+						if (cursor) startQuery(true)
+						preventDefault(e)
+					} else if (!code && isOpen) {
+						if (/^Arrow[UD]/.test(key)) {
+							move(key[5] == "U")
+							preventDefault(e)
+						} else if (/Tab|Enter/.test(key)) {
+							insertOption(activeIndex)
+							preventDefault(e)
+						} else if (key == "Escape") {
+							hide()
+							preventDefault(e)
+						} else if (key.slice(0, 4) == "Page") {
+							measureRowHeight()
+							let top = tooltip.scrollTop
+							let height = tooltip.clientHeight
+							let newActive: number
+							if (key[4] == "U") {
+								newActive = Math.ceil(top / rowHeight)
+								activeIndex =
+									activeIndex == newActive || newActive - 1 == activeIndex
+										? Math.ceil(Math.max(0, (top - height) / rowHeight + 1))
+										: newActive
+							} else {
+								top += height + 1
+								newActive = Math.ceil(top / rowHeight - 2)
+								activeIndex =
+									activeIndex == newActive || newActive + 1 == activeIndex
+										? Math.ceil(Math.min(numOptions - 1, (top + height) / rowHeight - 3))
+										: newActive
+							}
+							scrollActiveIntoView()
+							updateActive()
+							preventDefault(e)
+						}
+					} else if ((code & 7) == 0 && !isOpen && key == "Tab" && stops) {
+						if (!code) {
+							moveActiveStop(2)
+							if (activeStop + 3 > stops.length) clearStops()
+							preventDefault(e)
+						} else if (activeStop) {
+							moveActiveStop(-2)
+							preventDefault(e)
+						}
+					} else if (!isOpen && !code && key == "Escape") {
+						clearStops()
+						preventDefault(e)
+					}
+				},
+				true,
+			),
+		]
+
 		tabStopsContainer.className = "pce-tabstops"
 		textarea.setAttribute("aria-controls", id)
 		textarea.setAttribute("aria-autocomplete", "list")
@@ -331,116 +445,9 @@ const autoComplete =
 			}
 		})
 
-		addTextareaListener(editor, "mousedown", () => {
-			if (stops) {
-				setTimeout(() => {
-					// Timeout runs before selectionChange, but after
-					// the selection changes as a result of the click
-					const [start, end] = getSelection()
-					if (stops && (start < stops[activeStop] || end > stops[activeStop + 1])) {
-						for (let i = 0, l = stops.length; i < stops.length; i += 2) {
-							if (start >= stops[i] && end <= stops[i + 1]) {
-								if (i + 3 > l) clearStops()
-								else activeStop = i
-								break
-							}
-						}
-					}
-				})
-			}
+		onCleanup(() => {
+			cleanUps.forEach(c => c())
 		})
-		addTextareaListener(
-			editor,
-			"beforeinput",
-			e => {
-				let inputType = e.inputType
-				let isDelete = inputType[0] == "d"
-				let isInsert = inputType == "insertText"
-				let data = e.data
-				if (
-					isOpen &&
-					isInsert &&
-					!prevSelection &&
-					data &&
-					!data[1] &&
-					currentOptions[activeIndex][4].commitChars?.includes(data)
-				) {
-					insertOption(activeIndex)
-				}
-
-				if (stops) {
-					currentSelection = getSelection()
-					isDeleteForwards =
-						isDelete && inputType[13] == "F" && currentSelection[0] == currentSelection[1]
-				}
-				shouldOpen =
-					!config.explicitOnly &&
-					(shouldOpen || (isInsert && !prevSelection) || (isDelete && isOpen))
-			},
-			true,
-		)
-		addTextareaListener(editor, "blur", e => {
-			if (config.closeOnBlur != false && !tooltip.contains(e.relatedTarget as Element)) hide()
-		})
-		addTextareaListener(
-			editor,
-			"keydown",
-			e => {
-				const key = e.key
-				const code = getModifierCode(e)
-
-				if (key == " " && code == 2) {
-					if (cursor) startQuery(true)
-					preventDefault(e)
-				} else if (!code && isOpen) {
-					if (/^Arrow[UD]/.test(key)) {
-						move(key[5] == "U")
-						preventDefault(e)
-					} else if (/Tab|Enter/.test(key)) {
-						insertOption(activeIndex)
-						preventDefault(e)
-					} else if (key == "Escape") {
-						hide()
-						preventDefault(e)
-					} else if (key.slice(0, 4) == "Page") {
-						measureRowHeight()
-						let top = tooltip.scrollTop
-						let height = tooltip.clientHeight
-						let newActive: number
-						if (key[4] == "U") {
-							newActive = Math.ceil(top / rowHeight)
-							activeIndex =
-								activeIndex == newActive || newActive - 1 == activeIndex
-									? Math.ceil(Math.max(0, (top - height) / rowHeight + 1))
-									: newActive
-						} else {
-							top += height + 1
-							newActive = Math.ceil(top / rowHeight - 2)
-							activeIndex =
-								activeIndex == newActive || newActive + 1 == activeIndex
-									? Math.ceil(Math.min(numOptions - 1, (top + height) / rowHeight - 3))
-									: newActive
-						}
-						scrollActiveIntoView()
-						updateActive()
-						preventDefault(e)
-					}
-				} else if ((code & 7) == 0 && !isOpen && key == "Tab" && stops) {
-					if (!code) {
-						moveActiveStop(2)
-						if (activeStop + 3 > stops.length) clearStops()
-						preventDefault(e)
-					} else if (activeStop) {
-						moveActiveStop(-2)
-						preventDefault(e)
-					}
-				} else if (!isOpen && !code && key == "Escape") {
-					clearStops()
-					preventDefault(e)
-				}
-			},
-			true,
-		)
 
 		list.onmousedown = e => {
 			insertOption([].indexOf.call(rows, (e.target as HTMLElement).closest("li") as never) + offset)
