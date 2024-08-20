@@ -11,6 +11,7 @@ import {
 	regexEscape,
 } from "../utils"
 import { isMac, languageMap, preventDefault } from "../core"
+import { getStyleValue } from "../utils/other"
 
 let ignoreTab = false
 
@@ -39,6 +40,7 @@ const whitespaceEnd = (str: string) => str.search(/\S|$/)
  *
  * - Alt+ArrowUp/Down: Move line up/down
  * - Shift+Alt+ArrowUp/Down: Copy line up/down
+ * - Ctrl+ArrowUp/Down (Not on MacOS): Scroll up/down 1 line
  * - Ctrl+Enter (Cmd+Enter on MacOS): Insert blank line
  * - Ctrl+[ (Cmd+[ on MacOS): Outdent line
  * - Ctrl+] (Cmd+] on MacOS): Indent line
@@ -60,7 +62,7 @@ const defaultCommands =
 	): Extension =>
 	editor => {
 		let prevCopy: string
-		const { keyCommandMap, inputCommandMap, getSelection, props } = editor
+		const { keyCommandMap, inputCommandMap, getSelection, props, container } = editor
 
 		const getIndent = ({ insertSpaces = true, tabSize } = props) =>
 			[insertSpaces ? " " : "\t", insertSpaces ? tabSize || 2 : 1] as const
@@ -232,32 +234,36 @@ const defaultCommands =
 			}
 		})
 
-		for (let i = 0; i < 2; i++)
+		for (let i = 0; i < 2; i++) {
 			addCommand(cleanUps, keyCommandMap, i ? "ArrowDown" : "ArrowUp", (e, [start, end], value) => {
 				const code = getModifierCode(e)
-				if ((code & 0b111) == 1) {
-					if (code == 1) {
-						// Moving lines
-						const newStart = i ? start : getLineStart(value, start) - 1
-						const newEnd = i ? value.indexOf("\n", end) + 1 : end
-						if (newStart > -1 && newEnd > 0) {
-							const [lines, start1, end1] = getLines(value, newStart, newEnd),
-								line = lines[i ? "pop" : "shift"]()!,
-								offset = (line.length + 1) * (i ? 1 : -1)
 
-							lines[i ? "unshift" : "push"](line)
-							insertText(editor, lines.join("\n"), start1, end1, start + offset, end + offset)
-						}
-					} else {
-						// Copying lines
-						const [lines, start1, end1] = getLines(value, start, end)
-						const str = lines.join("\n"),
-							offset = i ? str.length + 1 : 0
-						insertText(editor, str + "\n" + str, start1, end1, start + offset, end + offset)
+				if (code == 1) {
+					// Moving lines
+					const newStart = i ? start : getLineStart(value, start) - 1
+					const newEnd = i ? value.indexOf("\n", end) + 1 : end
+					if (newStart > -1 && newEnd > 0) {
+						const [lines, start1, end1] = getLines(value, newStart, newEnd)
+						const line = lines[i ? "pop" : "shift"]()!
+						const offset = (line.length + 1) * (i ? 1 : -1)
+
+						lines[i ? "unshift" : "push"](line)
+						insertText(editor, lines.join("\n"), start1, end1, start + offset, end + offset)
 					}
 					return scroll()
+				} else if (code == 9) {
+					// Copying lines
+					const [lines, start1, end1] = getLines(value, start, end)
+					const str = lines.join("\n")
+					const offset = i ? str.length + 1 : 0
+					insertText(editor, str + "\n" + str, start1, end1, start + offset, end + offset)
+					return scroll()
+				} else if (code == 2 && !isMac) {
+					container.scrollBy(0, getStyleValue(container, "lineHeight") * (i ? 1 : -1))
+					return true
 				}
 			})
+		}
 
 		cleanUps.push(
 			addListener(editor, "keydown", e => {
