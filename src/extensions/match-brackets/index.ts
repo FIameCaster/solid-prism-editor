@@ -51,15 +51,16 @@ export const matchBrackets = (
 	closingBrackets = ")]}",
 ): Extension => {
 	return editor => {
-		let bracketIndex = 0
+		let bracketIndex: number
+		let sp: number
+		const stack: [number, number][] = []
 		const brackets: Bracket[] = []
 		const pairMap: number[] = []
 
 		const matchRecursive = (tokens: TokenStream, position: number, level: number) => {
-			let stack: [number, number][] = []
-			let sp = 0
 			let token: string | Token
-			for (let i = 0; (token = tokens[i++]); ) {
+			let i = 0
+			for (; (token = tokens[i++]); ) {
 				let length = token.length
 				if (typeof token != "string") {
 					let content = token.content
@@ -105,7 +106,7 @@ export const matchBrackets = (
 		}
 
 		createComputed(() => {
-			pairMap.length = brackets.length = bracketIndex = 0
+			pairMap.length = brackets.length = sp = bracketIndex = 0
 			matchRecursive(editor.tokens(), 0, 0)
 			if (rainbowBrackets) {
 				for (let i = 0, bracket: Bracket; (bracket = brackets[i]); ) {
