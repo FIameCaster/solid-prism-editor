@@ -10,13 +10,14 @@ import "../scrollbar.css"
 import "../extensions/folding/folding.css"
 import "../extensions/copy-button/copy.css"
 import "../extensions/search/search.css"
+import "../extensions/search/invisibles.css"
 import "../extensions/autocomplete/style.css"
 import "../extensions/autocomplete/icons.css"
 import { matchBrackets } from "../extensions/match-brackets"
 import { highlightBracketPairs } from "../extensions/match-brackets/highlight"
 import { indentGuides } from "../extensions/guides"
 import { searchWidget } from "../extensions/search/widget"
-import { highlightSelectionMatches } from "../extensions/search/selection"
+import { highlightSelectionMatches, showInvisibles } from "../extensions/search"
 import core from "../core?raw"
 import { highlightMatchingTags, matchTags } from "../extensions/match-tags"
 import { cursorPosition } from "../extensions/cursor"
@@ -96,6 +97,7 @@ const App: Component = () => {
 		tooltip,
 		copyButton(),
 		overscroll(),
+		showInvisibles(),
 		autoComplete({
 			filter: fuzzyFilter,
 		}),

@@ -79,7 +79,7 @@ const Editor = (props: Partial<EditorProps>) => {
 	const inputCommandMap: Record<string, InputCommandCallback | null> = {}
 
 	// Safari focuses the textarea if you change its selection or value programmatically
-	const focusRelatedTarget = () => () =>
+	const focusRelatedTarget = () =>
 		isWebKit &&
 		untrack(focused) &&
 		addTextareaListener(
