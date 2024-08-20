@@ -438,6 +438,7 @@ const editHistory =
 		let prevInputType: string
 		let prevData: string | null
 		let isMerge: boolean
+		let prevTime: number
 
 		const extensions = editor.extensions
 		const getSelection = editor.getSelection
@@ -470,6 +471,7 @@ const editHistory =
 			addListener(editor, "beforeinput", e => {
 				let data = e.data
 				let inputType = e.inputType
+				let time = e.timeStamp
 
 				if (/history/.test(inputType)) {
 					setEditorState(sp + (inputType[7] == "U" ? -1 : 1))
@@ -477,15 +479,16 @@ const editHistory =
 				} else if (
 					!(isMerge =
 						allowMerge &&
-						prevInputType == inputType &&
-						e.isTrusted &&
-						!data?.includes("\n") &&
+						(prevInputType == inputType ||
+							(time - prevTime < 99 && inputType.slice(-4) == "Drop")) &&
+						!prevSelection &&
 						(data != " " || prevData == data))
 				) {
 					stack[sp][2] = prevSelection || getSelection()
 				}
 				isTyping = true
 				prevData = data
+				prevTime = time
 				prevInputType = inputType
 			}),
 			addListener(editor, "input", () => update(sp + <any>!isMerge)),
