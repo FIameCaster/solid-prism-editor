@@ -55,7 +55,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.12.6",
-    "prism-code-editor": "^3.3.2",
+    "prism-code-editor": "^3.4.0",
     "solid-devtools": "^0.29.2",
     "solid-js": "^1.8.11",
     "typescript": "^5.3.3",
