@@ -10,6 +10,8 @@ import "../scrollbar.css"
 import "../extensions/folding/folding.css"
 import "../extensions/copy-button/copy.css"
 import "../extensions/search/search.css"
+import "../extensions/autocomplete/style.css"
+import "../extensions/autocomplete/icons.css"
 import { matchBrackets } from "../extensions/match-brackets"
 import { highlightBracketPairs } from "../extensions/match-brackets/highlight"
 import { indentGuides } from "../extensions/guides"
@@ -26,6 +28,30 @@ import { addTooltip } from "../tooltips"
 import { languages } from "../prism"
 import { loadTheme } from "../themes"
 import { overscroll } from "../extensions/overscroll"
+import {
+	autoComplete,
+	completeSnippets,
+	fuzzyFilter,
+	registerCompletions,
+} from "../extensions/autocomplete"
+import {
+	completeIdentifiers,
+	completeKeywords,
+	globalReactAttributes,
+	jsContext,
+	jsDocCompletion,
+	jsSnipets,
+	jsxTagCompletion,
+	reactTags,
+} from "../extensions/autocomplete/javascript"
+import {
+	globalHtmlAttributes,
+	globalSvgAttributes,
+	htmlTags,
+	markupCompletion,
+	svgTags,
+} from "../extensions/autocomplete/markup"
+import { cssCompletion } from "../extensions/autocomplete/css"
 
 const tooltip: Extension = editor => {
 	const { show, hide, element } = addTooltip(
@@ -70,6 +96,9 @@ const App: Component = () => {
 		tooltip,
 		copyButton(),
 		overscroll(),
+		autoComplete({
+			filter: fuzzyFilter,
+		}),
 	]
 
 	const readExtensions = extensions.concat(
@@ -153,5 +182,29 @@ const App: Component = () => {
 		</>
 	)
 }
+
+registerCompletions(["javascript", "js", "jsx", "tsx", "typescript", "ts"], {
+	context: jsContext,
+	sources: [
+		// completeScope(window),
+		completeIdentifiers(),
+		completeKeywords,
+		jsDocCompletion,
+		jsxTagCompletion(reactTags, globalReactAttributes),
+		completeSnippets(jsSnipets),
+	],
+})
+
+registerCompletions(["html", "markup"], {
+	sources: [markupCompletion(htmlTags, globalHtmlAttributes)],
+})
+
+registerCompletions(["svg"], {
+	sources: [markupCompletion(svgTags, globalSvgAttributes)],
+})
+
+registerCompletions(["css"], {
+	sources: [cssCompletion()],
+})
 
 export default App

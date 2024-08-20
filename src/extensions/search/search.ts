@@ -2,8 +2,8 @@ import { template } from "solid-js/web"
 import { PrismEditor } from "../../types"
 import { regexEscape } from "../../utils"
 
-const containerT = template(
-	'<div style="color:#0000;display:none;contain:strict;padding:0 var(--_pse) 0 var(--padding-left)" aria-hidden=true>',
+const searchTemplate = template(
+	'<div style="color:#0000;display:none;contain:strict;padding:0 var(--_pse) 0 var(--padding-left)" aria-hidden=true> ',
 )
 
 const matchTemplate = template("<span> ")
@@ -57,9 +57,9 @@ export interface SearchAPI {
 
 /** Function adding search functionality to an editor. */
 const createSearchAPI = (editor: PrismEditor): SearchAPI => {
-	const nodes: ChildNode[] = [new Text()]
-	const nodeValues: string[] = []
-	const container = containerT() as HTMLDivElement
+	const container = searchTemplate() as HTMLDivElement
+	const nodes: ChildNode[] = [container.firstChild!]
+	const nodeValues: string[] = [" "]
 	const matchPositions: [number, number][] = []
 	const stopSearch = () => {
 		if (matchPositions[0]) {
@@ -69,7 +69,7 @@ const createSearchAPI = (editor: PrismEditor): SearchAPI => {
 	}
 
 	let regex: RegExp
-	let nodeCount = 0
+	let nodeCount = 1
 
 	return {
 		search(str, caseSensitive, wholeWord, useRegExp, selection, filter, pattern) {
@@ -139,4 +139,4 @@ const createSearchAPI = (editor: PrismEditor): SearchAPI => {
 	}
 }
 
-export { createSearchAPI }
+export { createSearchAPI, matchTemplate, searchTemplate }
